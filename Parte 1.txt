@@ -1,0 +1,108 @@
+1
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.json.JSONObject;
+import org.junit.Assert;
+
+public class APIAutomation {
+    
+    private static final String BASE_URL = "https://demoqa.com";
+
+    public static void main(String[] args) {
+        // Passo 1: Criar um Usuário
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("userName", "user123");
+        requestBody.put("password", "password123");
+
+        Response response = RestAssured.given()
+                .baseUri(BASE_URL)
+                .contentType(ContentType.JSON)
+                .body(requestBody.toString())
+                .when()
+                .post("/Account/v1/User");
+
+        // Verificar se o usuário foi criado com sucesso
+        Assert.assertEquals(201, response.getStatusCode());
+        System.out.println("Usuário criado com sucesso!");
+    }
+
+}
+
+// Passo 2: Gerar um Token de Acesso
+public static String generateToken() {
+    JSONObject requestBody = new JSONObject();
+    requestBody.put("userName", "user123");
+    requestBody.put("password", "password123");
+
+    Response response = RestAssured.given()
+            .baseUri(BASE_URL)
+            .contentType(ContentType.JSON)
+            .body(requestBody.toString())
+            .when()
+            .post("/Account/v1/GenerateToken");
+
+    // Extrair o token da resposta
+    String token = response.jsonPath().getString("token");
+    Assert.assertNotNull(token);
+    System.out.println("Token gerado: " + token);
+    return token;
+}
+
+// Passo 3: Confirmar se o Usuário está Autorizado
+public static void checkAuthorization(String token) {
+    Response response = RestAssured.given()
+            .baseUri(BASE_URL)
+            .header("Authorization", "Bearer " + token)
+            .when()
+            .get("/Account/v1/Authorized");
+
+    Assert.assertEquals(200, response.getStatusCode());
+    System.out.println("Usuário está autorizado!");
+}
+
+// Passo 4: Listar os Livros Disponíveis
+public static void listBooks() {
+    Response response = RestAssured.given()
+            .baseUri(BASE_URL)
+            .when()
+            .get("/BookStore/v1/Books");
+
+    Assert.assertEquals(200, response.getStatusCode());
+    System.out.println("Livros disponíveis: " + response.getBody().asString());
+}
+
+// Passo 5: Alugar dois livros de livre escolha
+public static void reserveBooks(String token) {
+    // Escolher dois livros para alugar
+    JSONObject requestBody = new JSONObject();
+    requestBody.put("userId", "user123");
+    requestBody.put("collectionOfIsbns", new JSONArray()
+        .put(new JSONObject().put("isbn", "9781449331818"))
+        .put(new JSONObject().put("isbn", "9781449325862"))
+    );
+
+    Response response = RestAssured.given()
+            .baseUri(BASE_URL)
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(requestBody.toString())
+            .when()
+            .post("/BookStore/v1/Books");
+
+    Assert.assertEquals(200, response.getStatusCode());
+    System.out.println("Livros reservados com sucesso!");
+}
+
+// Passo 6: Listar os detalhes do usuário com os livros escolhidos
+public static void listUserDetails(String userId, String token) {
+    Response response = RestAssured.given()
+            .baseUri(BASE_URL)
+            .header("Authorization", "Bearer " + token)
+            .when()
+            .get("/Account/v1/User/" + userId);
+
+    Assert.assertEquals(200, response.getStatusCode());
+    System.out.println("Detalhes do usuário: " + response.getBody().asString());
+}
