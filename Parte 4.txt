@@ -1,0 +1,67 @@
+4
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.*;
+import org.openqa.selenium.support.ui.*;
+import org.openqa.selenium.interactions.Actions;
+import java.util.List;
+
+public class WebTablesAutomation {
+    public static void main(String[] args) {
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            // Passo 1: Acessar o site demoqa.com
+            driver.get("https://demoqa.com/");
+            
+            // Passo 2: Acessar a opção "Elements"
+            driver.findElement(By.linkText("Elements")).click();
+
+            // Passo 3: Clicar no submenu "Web Tables"
+            driver.findElement(By.linkText("Web Tables")).click();
+
+            // Passo 4: Criar um novo registro
+            driver.findElement(By.id("addNewRecordButton")).click();
+            
+            // Preencher o formulário para adicionar um novo registro
+            driver.findElement(By.id("firstName")).sendKeys("John");
+            driver.findElement(By.id("lastName")).sendKeys("Doe");
+            driver.findElement(By.id("userEmail")).sendKeys("john.doe@example.com");
+            driver.findElement(By.id("age")).sendKeys("30");
+            driver.findElement(By.id("salary")).sendKeys("50000");
+            driver.findElement(By.id("department")).sendKeys("IT");
+
+            // Submeter o formulário
+            driver.findElement(By.id("submit")).click();
+
+            // Passo 5: Editar o novo registro
+            // Localizar o botão de editar (clica no ícone de lápis na primeira linha)
+            driver.findElement(By.xpath("//div[@role='row']//span[text()='John']/ancestor::div[@role='row']//span[contains(@id, 'edit')]")).click();
+            
+            // Editar os campos
+            WebElement salaryField = driver.findElement(By.id("salary"));
+            salaryField.clear();
+            salaryField.sendKeys("55000");
+            
+            WebElement departmentField = driver.findElement(By.id("department"));
+            departmentField.clear();
+            departmentField.sendKeys("Marketing");
+
+            // Submeter as alterações
+            driver.findElement(By.id("submit")).click();
+
+            // Passo 6: Deletar o novo registro
+            // Localizar o botão de excluir (clica no ícone de lixeira na primeira linha)
+            driver.findElement(By.xpath("//div[@role='row']//span[text()='John']/ancestor::div[@role='row']//span[contains(@id, 'delete')]")).click();
+
+            // Confirmar a exclusão
+            Alert alert = driver.switchTo().alert();
+            alert.accept();
+
+        } finally {
+            // Fechar o navegador
+            driver.quit();
+        }
+    }
+}

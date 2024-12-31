@@ -1,0 +1,62 @@
+3
+import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.*;
+import org.openqa.selenium.support.ui.*;
+
+public class BrowserWindowAutomation {
+    public static void main(String[] args) {
+        // Inicializando o WebDriver (Chrome)
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            // Passo 1: Acessar o site demoqa.com
+            driver.get("https://demoqa.com/");
+
+            // Passo 2: Acessar a opção "Alerts, Frame & Windows"
+            driver.findElement(By.linkText("Alerts, Frame & Windows")).click();
+
+            // Passo 3: Clicar no submenu "Browser Windows"
+            driver.findElement(By.linkText("Browser Windows")).click();
+
+            // Passo 4: Clicar no botão "New Window"
+            WebElement newWindowButton = driver.findElement(By.id("windowButton"));
+            newWindowButton.click();
+
+            // Passo 5: Trocar para a nova janela aberta
+            // Armazenar o ID da janela principal
+            String mainWindowHandle = driver.getWindowHandle();
+
+            // Aguardar até que a nova janela seja aberta
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            wait.until(ExpectedConditions.numberOfWindowsToBe(2));
+
+            // Mudar para a nova janela
+            for (String windowHandle : driver.getWindowHandles()) {
+                if (!windowHandle.equals(mainWindowHandle)) {
+                    driver.switchTo().window(windowHandle);
+                    break;
+                }
+            }
+
+            // Passo 6: Validar a mensagem "This is a sample page" na nova janela
+            WebElement messageElement = driver.findElement(By.tagName("h1"));
+            String message = messageElement.getText();
+            if (message.equals("This is a sample page")) {
+                System.out.println("Mensagem validada: " + message);
+            } else {
+                System.out.println("Mensagem não encontrada!");
+            }
+
+            // Passo 7: Fechar a nova janela
+            driver.close();
+
+            // Voltar para a janela principal
+            driver.switchTo().window(mainWindowHandle);
+
+        } finally {
+            // Fechar o navegador
+            driver.quit();
+        }
+    }
+}
